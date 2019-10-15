@@ -94,7 +94,7 @@ public class TransactionTest {
 		assertEquals(before + 2f * 10f, after, 0.001f);		
 	}
 	
-
+ 
 	
 	public static DataSource getDataSource() throws SQLException {
 		org.hsqldb.jdbc.JDBCDataSource ds = new org.hsqldb.jdbc.JDBCDataSource();

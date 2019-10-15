@@ -76,10 +76,40 @@ public class DAO {
 	 * taille
 	 * @throws java.lang.Exception si la transaction a échoué
 	 */
-	public void createInvoice(CustomerEntity customer, int[] productIDs, int[] quantities)
-		throws Exception {
-		throw new UnsupportedOperationException("Pas encore implémenté");
-	}
+	public void createInvoice(CustomerEntity customer, int[] productIDs, int[] quantities) throws Exception{
+		if (productIDs.length != quantities.length){
+                    throw new Exception("Les tableaux n'ont pas la même taille");
+                }
+                
+               String sql = "INSERT INTO Invoice (CustomerID) VALUES (?)";
+               String sql2 = "SELECT Price FROM Product WHERE ID = ?";
+               String sql3 = "INSERT INTO Item (InvoiceID, Item, ProductID, Quantity, Cost) VALUES (?,?,?,?,?)";
+	       try (Connection connection = myDataSource.getConnection();
+                    PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS); 
+                    PreparedStatement statement2 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement statement3 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+                    ResultSet clefs = statement.getGeneratedKeys(); 
+                    statement.setInt(1, customer.getCustomerId());
+                    statement.executeUpdate();
+                    clefs.next();
+                    int invoiceID = clefs.getInt(1);
+                    
+                    for (int i =0;i<productIDs.length;i++){
+                        PreparedStatement stmt = connection.prepareStatement(sql2,Statement.RETURN_GENERATED_KEYS);
+                        stmt.setInt(1, productIDs[i]);
+                        stmt.setInt(2, quantities[i]);
+                        
+                    } 
+               }
+               
+               
+                  
+                  
+        }
+               
+               
+			
+
 
 	/**
 	 *
