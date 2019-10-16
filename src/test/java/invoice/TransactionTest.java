@@ -86,13 +86,75 @@ public class TransactionTest {
 		// On exécute la transaction
 		myDAO.createInvoice(myCustomer, productIds, quantities);
 
-		float after = myDAO.totalForCustomer(id);
+			
+	}
+        
+        @Test (expected = Exception.class)
+	public void UnknownProductID() throws Exception {
+		// On calcule le chiffre d'aafaire du client
+		int id = myCustomer.getCustomerId();
+		float before = myDAO.totalForCustomer(id);
+
+		// Un tableau de 1 productID
+		int[] productIds = new int[]{14684}; // Le produit 0 vaut 10 €
+		// Un tableau de 1 quantites
+		int[] quantities = new int[]{2};
+		// On exécute la transaction
+		myDAO.createInvoice(myCustomer, productIds, quantities);
+                
+                float after = myDAO.totalForCustomer(id);
 		System.out.printf("After: %f %n", after);
 
 		// Le client a maintenant 2*10€ de plus
 
-		assertEquals(before + 2f * 10f, after, 0.001f);		
+		assertEquals(before + 2f * 10f, after, 0.001f);	
 	}
+        
+        @Test (expected = Exception.class)
+	public void InvalidQuantities() throws Exception {
+		// On calcule le chiffre d'aafaire du client
+		int id = myCustomer.getCustomerId();
+		float before = myDAO.totalForCustomer(id);
+
+		// Un tableau de 1 productID
+		int[] productIds = new int[]{1}; // Le produit 0 vaut 10 €
+		// Un tableau de 1 quantites
+		int[] quantities = new int[]{-3};
+		// On exécute la transaction
+		myDAO.createInvoice(myCustomer, productIds, quantities);
+	
+                float after = myDAO.totalForCustomer(id);
+		System.out.printf("After: %f %n", after);
+
+		// Le client a maintenant 2*10€ de plus
+
+		assertEquals(before + 2f * 10f, after, 0.001f);	
+        }
+        
+        @Test 
+	public void TestIntegrite() throws Exception {
+		// On calcule le chiffre d'aafaire du client
+		int id = myCustomer.getCustomerId();
+		float before = myDAO.totalForCustomer(id);
+
+		// Un tableau de 1 productID
+		int[] productIds = new int[]{1}; // Le produit 0 vaut 10 €
+		// Un tableau de 1 quantites
+		int[] quantities = new int[]{-3};
+		// On exécute la transaction
+		try {
+                    myDAO.createInvoice(myCustomer, productIds, quantities);
+                } catch (Exception ex){
+                    
+                }
+	
+                float after = myDAO.totalForCustomer(id);
+		System.out.printf("After: %f %n", after);
+
+		// Le client a maintenant 2*10€ de plus
+
+		assertEquals(before, after, 0.001f);	
+        }
 	
  
 	

@@ -86,31 +86,54 @@ public class DAO {
                String sql3 = "INSERT INTO Item (InvoiceID, Item, ProductID, Quantity, Cost) VALUES (?,?,?,?,?)";
 	       try (Connection connection = myDataSource.getConnection();
                     PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS); 
-                    PreparedStatement statement2 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                    PreparedStatement statement3 = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
-                    ResultSet clefs = statement.getGeneratedKeys(); 
-                    statement.setInt(1, customer.getCustomerId());
-                    statement.executeUpdate();
-                    clefs.next();
-                    int invoiceID = clefs.getInt(1);
+                    PreparedStatement statement2 = connection.prepareStatement(sql2);
+                    PreparedStatement statement3 = connection.prepareStatement(sql3)){
+                    connection.setAutoCommit(false);
+                    try {
+                        statement.setInt(1, customer.getCustomerId());
+                        statement.executeUpdate();
+                        ResultSet clefs = statement.getGeneratedKeys(); 
+                        clefs.next();
+                        int invoiceID = clefs.getInt(1);
+
+                        for (int i =0;i<productIDs.length;i++){
+                            
+                            statement2.setInt(1, productIDs[i]);
+                            ResultSet rs = statement2.executeQuery();
+                            rs.next();
+                            float prix = rs.getFloat("Price");
+                            
+                            
+                            
+                            statement3.setInt(1, invoiceID);
+                            statement3.setInt(2, i);
+                            statement3.setInt(3, productIDs[i]);
+                            if ( quantities[i] < 0 )
+                                throw new Exception ("La quantité ne peux être négative");
+                            statement3.setInt(4, quantities[i]);
+                            statement3.setFloat(5, prix);
+                            
+                            int eU = statement3.executeUpdate();
+                            
+                            if ( eU  == 0){
+                                throw new Exception (" Problème d'ajout d'Item ");
+                            }
+                            
+                            statement2.clearParameters();
+                            statement3.clearParameters();
+                        } 
+                        connection.commit();
                     
-                    for (int i =0;i<productIDs.length;i++){
-                        PreparedStatement stmt = connection.prepareStatement(sql2,Statement.RETURN_GENERATED_KEYS);
-                        stmt.setInt(1, productIDs[i]);
-                        stmt.setInt(2, quantities[i]);
-                        
-                    } 
-               }
-               
-               
-                  
-                  
+                    } catch (Exception e) {
+                        connection.rollback();
+                        throw e;
+                    } finally {
+                        connection.setAutoCommit(true);
+                    }    
+               }  
         }
-               
-               
-			
-
-
+        
+        
 	/**
 	 *
 	 * @return le nombre d'enregistrements dans la table CUSTOMER
